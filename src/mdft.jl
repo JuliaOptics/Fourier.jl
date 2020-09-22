@@ -16,11 +16,11 @@ as zero padding it to 512x512 and FFTing that.
 
 See also: [`imdft`](@ref)
 """
-function mdft(ary, samples::Integer, shift::Tuple{Real}=(0,0), Q=1)
+function mdft(ary, samples::Integer, shift::Tuple{Real,Real}=(0,0), Q=1)
     return mdft(ary, (samples,samples), shift, Q)
 end
 
-function mdft(ary, samples::Tuple{Int}, shift::Tuple{Real}=(0,0), Q=1)
+function mdft(ary, samples::Tuple{Integer,Integer}, shift::Tuple{Real,Real}=(0,0), Q=1)
     U = -(samples[1]÷2):(samples[1]÷2-1);
     V = -(samples[2]÷2):(samples[2]÷2-1);
     if shift[1] != 0
@@ -61,11 +61,11 @@ as zero padding it to 512x512 and FFTing that.
 
 See also: [`mdft`](@ref)
 """
-function imdft(ary, samples::Integer, shift::Tuple{Real}=(0,0), Q=1)
+function imdft(ary, samples::Integer, shift::Tuple{Real,Real}=(0,0), Q=1)
     return imdft(ary, (samples,samples), shift, Q)
 end
 
-function imdft(ary, samples::Tuple{Int}, shift::Tuple{Real}=(0,0), Q=1)
+function imdft(ary, samples::Tuple{Integer,Integer}, shift::Tuple{Real,Real}=(0,0), Q=1)
     U = -(samples[1]÷2):(samples[1]÷2-1);
     V = -(samples[2]÷2):(samples[2]÷2-1);
     if shift[1] != 0
