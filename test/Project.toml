@@ -1,0 +1,8 @@
+name = "runtests"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+
+Fourier = "424e878d-f74a-44ed-9ae4-e4144b72a8ff"
