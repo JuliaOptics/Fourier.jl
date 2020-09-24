@@ -1,3 +1,8 @@
+# reading that the indices are out of order in the function bodies may lead
+# one to conclude that this code is written backwards, but julia is column major
+# and the code is correct.  If this pithy comment doesn't convince you,
+# the tests that match FFTW might.
+
 """
     mdft(ary, samples[, shift, Q])
 
@@ -21,8 +26,8 @@ function mdft(ary, samples::Integer, shift::Tuple{Real,Real}=(0,0), Q=1)
 end
 
 function mdft(ary, samples::Tuple{Integer,Integer}, shift::Tuple{Real,Real}=(0,0), Q=1)
-    U = -(samples[1]÷2):(samples[1]÷2-1);
-    V = -(samples[2]÷2):(samples[2]÷2-1);
+    U = _fftrange(samples[2]);
+    V = _fftrange(samples[1]);
     if shift[1] != 0
         U += shift[1]
     end
@@ -35,8 +40,8 @@ end
 function _mdft(ary, U, V, Q)
     n, m = size(ary);
     # X,Y,U,V look like-128 : 127, say
-    X = -(n÷2):(n÷2-1);
-    Y = -(m÷2):(m÷2-1);
+    X = _fftrange(m);
+    Y = _fftrange(n);
     kernel = -1im * 2 * π / Q;
     pre = exp.(kernel / n .* (Y * V'));
     post = exp.(kernel / m .* (X * U'));
@@ -66,8 +71,8 @@ function imdft(ary, samples::Integer, shift::Tuple{Real,Real}=(0,0), Q=1)
 end
 
 function imdft(ary, samples::Tuple{Integer,Integer}, shift::Tuple{Real,Real}=(0,0), Q=1)
-    U = -(samples[1]÷2):(samples[1]÷2-1);
-    V = -(samples[2]÷2):(samples[2]÷2-1);
+    U = _fftrange(samples[1]);
+    V = _fftrange(samples[2]);
     if shift[1] != 0
         U += shift[1]
     end
@@ -80,10 +85,26 @@ end
 function _imdft(ary, U, V, Q)
     n, m = size(ary);
     # X,Y,U,V look like-128 : 127, say
-    X = -(n÷2):(n÷2-1);
-    Y = -(m÷2):(m÷2-1);
+    X = _fftrange(n);
+    Y = _fftrange(m);
     kernel = 1im * 2 * π / Q;
     pre = exp.(kernel / n .* (Y * V'));
     post = exp.(kernel / m .* (X * U'));
     return pre * ary * post;
+end
+
+"""
+    _fftrange(n)
+
+Computes a range that always matches FFT expectations.  I.e., for even N ranges
+matches the example n=4 => -2:1:1 and for odd N matches the example 5 => -2:1:2.
+
+This can be understood as "the output range shall always contain zero, if there
+may be only one value for n÷2, it will be the negative one."
+"""
+function _fftrange(n)
+    if iseven(n)
+        return -(n÷2):(n÷2-1);
+    end
+    return -(n÷2):(n÷2);
 end
