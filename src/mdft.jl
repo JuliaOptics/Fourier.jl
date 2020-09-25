@@ -1,8 +1,3 @@
-# reading that the indices are out of order in the function bodies may lead
-# one to conclude that this code is written backwards, but julia is column major
-# and the code is correct.  If this pithy comment doesn't convince you,
-# the tests that match FFTW might.
-
 """
     mdft(ary, samples[, shift, Q])
 
@@ -26,7 +21,7 @@ function mdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
 end
 
 function mdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0), Q=1)
-    ξ = fftrange(samples[2]);
+    ξ = fftrange(samples[2])';
     η = fftrange(samples[1]);
     if shift[1] != 0
         ξ += shift[1]
@@ -39,13 +34,13 @@ end
 
 function _mdft(ary, ξ, η, Q)
     n, m = size(ary);
-    # X,Y,ξ,η look like-128 : 127, say
+    # X,Y,ξ,η look like -128 : 127, say
     X = fftrange(m);
-    Y = fftrange(n);
+    Y = fftrange(n)';
     kernel = -1im * 2 * π / Q;
-    pre = exp.(kernel / n .* (Y * η'));
-    post = exp.(kernel / m .* (X * ξ'));
-    return pre' * ary * post;
+    pre = exp.(kernel / n .* (η * Y));
+    post = exp.(kernel / m .* (X * ξ));
+    return pre * ary * post;
 end
 
 """
@@ -71,7 +66,7 @@ function imdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
 end
 
 function imdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0), Q=1)
-    ξ = fftrange(samples[2]);
+    ξ = fftrange(samples[2])';
     η = fftrange(samples[1]);
     if shift[1] != 0
         ξ += shift[1]
@@ -84,13 +79,13 @@ end
 
 function _imdft(ary, ξ, η, Q)
     n, m = size(ary);
-    # X,Y,ξ,η look like-128 : 127, say
+    # X,Y,ξ,η look like -128 : 127, say
     X = fftrange(m);
-    Y = fftrange(n);
+    Y = fftrange(n)';
     kernel = 1im * 2 * π / Q;
-    pre = exp.(kernel / n .* (Y * η'));
-    post = exp.(kernel / m .* (X * ξ'));
-    return pre' * ary * post;
+    pre = exp.(kernel / n .* (η * Y));
+    post = exp.(kernel / m .* (X * ξ));
+    return pre * ary * post;
 end
 
 """

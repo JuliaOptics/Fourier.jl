@@ -4,13 +4,25 @@ using FFTW
 
 using Fourier
 
+function test_core(ary; forward)
+    if forward
+        truth = fftshift(fft(ifftshift(ary)));
+        candidate = mdft(ary, size(ary));
+        @test candidate ≈ truth
+        return
+    end
+    truth = fftshift(ifft(ifftshift(ary)))
+    candidate = imdft(ary, size(ary))./length(ary);  # match ifft convention
+    @test candidate ≈ truth
+end
+
+
 @testset "regression against FFTW (even square array)" begin
     ary_sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 100]; # includes a non power of two
     for sz in ary_sizes
         a = rand(sz,sz);
-        truth = fftshift(fft(ifftshift(a)));
-        candidate = mdft(a, size(a));
-        @test truth ≈ candidate
+        test_core(a, forward=true)
+        test_core(a, forward=false)
     end
 end
 
@@ -18,9 +30,8 @@ end
     ary_sizes = [3, 5, 11, 19, 33, 51, 101, 201, 707, 555];
     for sz in ary_sizes
         a = rand(sz,sz);
-        truth = fftshift(fft(ifftshift(a)));
-        candidate = mdft(a, size(a));
-        @test truth ≈ candidate
+        test_core(a, forward=true)
+        test_core(a, forward=false)
     end
 end
 
@@ -37,9 +48,8 @@ end
     ];
     for sz in ary_sizes
         a = rand(sz...)
-        truth = fftshift(fft(ifftshift(a)));
-        candidate = mdft(a, size(a));
-        @test truth ≈ candidate
+        test_core(a, forward=true)
+        test_core(a, forward=false)
     end
 end
 
@@ -56,8 +66,23 @@ end
     ];
     for sz in ary_sizes
         a = rand(sz...)
-        truth = fftshift(fft(ifftshift(a)));
-        candidate = mdft(a, size(a));
-        @test truth ≈ candidate
+        test_core(a, forward=true)
+        test_core(a, forward=false)
     end
+end
+
+
+@testset "regression against FFTW (zoom, Q=2)" begin
+    b = rand(2,2);
+    a = zeros(4, 4);
+    a[2:3,2:3]=b;
+    # the comparison is slightly subtle
+    # mdft does not require padding to achieve
+    # sampling, so fft uses a (padded) while mdft uses b (unpadded)
+    truth = fftshift(fft(ifftshift(a)));
+    candidate = mdft(b, 4, Q=2);
+    @test candidate ≈ truth;
+    truth = fftshift(ifft(ifftshift(a)));
+    candidate = imdft(b, 4, Q=2)./length(truth);
+    @test candidate ≈ truth;
 end
