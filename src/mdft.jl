@@ -21,31 +21,31 @@ as zero padding it to 512x512 and FFTing that.
 
 See also: [`imdft`](@ref)
 """
-function mdft(ary, samples::Integer, shift::Tuple{Real,Real}=(0,0), Q=1)
-    return mdft(ary, (samples,samples), shift, Q)
+function mdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
+    return mdft(ary, (samples,samples), shift=shift, Q=Q)
 end
 
-function mdft(ary, samples::Tuple{Integer,Integer}, shift::Tuple{Real,Real}=(0,0), Q=1)
-    U = _fftrange(samples[2]);
-    V = _fftrange(samples[1]);
+function mdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0), Q=1)
+    ξ = fftrange(samples[2]);
+    η = fftrange(samples[1]);
     if shift[1] != 0
-        U += shift[1]
+        ξ += shift[1]
     end
     if shift[2] != 0
-        V += shift[2]
+        η += shift[2]
     end
-    return _mdft(ary, U, V, Q)
+    return _mdft(ary, ξ, η, Q)
 end
 
-function _mdft(ary, U, V, Q)
+function _mdft(ary, ξ, η, Q)
     n, m = size(ary);
-    # X,Y,U,V look like-128 : 127, say
-    X = _fftrange(m);
-    Y = _fftrange(n);
+    # X,Y,ξ,η look like-128 : 127, say
+    X = fftrange(m);
+    Y = fftrange(n);
     kernel = -1im * 2 * π / Q;
-    pre = exp.(kernel / n .* (Y * V'));
-    post = exp.(kernel / m .* (X * U'));
-    return pre * ary * post;
+    pre = exp.(kernel / n .* (Y * η'));
+    post = exp.(kernel / m .* (X * ξ'));
+    return pre' * ary * post;
 end
 
 """
@@ -66,43 +66,46 @@ as zero padding it to 512x512 and FFTing that.
 
 See also: [`mdft`](@ref)
 """
-function imdft(ary, samples::Integer, shift::Tuple{Real,Real}=(0,0), Q=1)
-    return imdft(ary, (samples,samples), shift, Q)
+function imdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
+    return imdft(ary, (samples,samples), shift=shift, Q=Q)
 end
 
-function imdft(ary, samples::Tuple{Integer,Integer}, shift::Tuple{Real,Real}=(0,0), Q=1)
-    U = _fftrange(samples[1]);
-    V = _fftrange(samples[2]);
+function imdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0), Q=1)
+    ξ = fftrange(samples[2]);
+    η = fftrange(samples[1]);
     if shift[1] != 0
-        U += shift[1]
+        ξ += shift[1]
     end
     if shift[2] != 0
-        V += shift[2]
+        η += shift[2]
     end
-    return _mdft(ary, U, V, Q)
+    return _imdft(ary, ξ, η, Q)
 end
 
-function _imdft(ary, U, V, Q)
+function _imdft(ary, ξ, η, Q)
     n, m = size(ary);
-    # X,Y,U,V look like-128 : 127, say
-    X = _fftrange(n);
-    Y = _fftrange(m);
+    # X,Y,ξ,η look like-128 : 127, say
+    X = fftrange(m);
+    Y = fftrange(n);
     kernel = 1im * 2 * π / Q;
-    pre = exp.(kernel / n .* (Y * V'));
-    post = exp.(kernel / m .* (X * U'));
-    return pre * ary * post;
+    pre = exp.(kernel / n .* (Y * η'));
+    post = exp.(kernel / m .* (X * ξ'));
+    return pre' * ary * post;
 end
 
 """
-    _fftrange(n)
+    fftrange(n)
 
 Computes a range that always matches FFT expectations.  I.e., for even N ranges
 matches the example n=4 => -2:1:1 and for odd N matches the example 5 => -2:1:2.
 
 This can be understood as "the output range shall always contain zero, if there
 may be only one value for n÷2, it will be the negative one."
+
+The range is always centered; frequency or sampling bins align to it with
+fftshift.  It can be fftshifted to be placed in post-FFT coordinates.
 """
-function _fftrange(n)
+function fftrange(n)
     if iseven(n)
         return -(n÷2):(n÷2-1);
     end
