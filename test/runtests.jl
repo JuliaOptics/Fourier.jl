@@ -86,3 +86,17 @@ end
     candidate = imdft(b, 4, Q=2)./length(truth);
     @test candidate ≈ truth;
 end
+
+@testset "shift works as expected" begin
+    data = ones(100,100);  # uniform plane has all energy in zero DFT bin
+    # => bump at (50,50) before shift
+    shifted_fwd = abs.(mdft(data, size(data), shift=(50,0)));
+    @test argmax(shifted_fwd)[2] == 1;
+    shifted_fwd = abs.(mdft(data, size(data), shift=(-49,0)));
+    @test argmax(shifted_fwd)[2] == 100;
+
+    shifted_fwd = abs.(imdft(data, size(data), shift=(50,0)));
+    @test argmax(shifted_fwd)[2] == 1;
+    shifted_fwd = abs.(imdft(data, size(data), shift=(-49,0)));
+    @test argmax(shifted_fwd)[2] == 100;
+end

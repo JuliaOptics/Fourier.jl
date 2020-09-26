@@ -8,13 +8,17 @@ samples is the number of samples in the output domain.  If it is an integer, it
 is broadcast to both dimensions.  Otherwise it may be a tuple to provide each.
 
 shift is used to move the origin.  If the output grid with shift=0 spanned
--10:1:9 Hz, shift=10 will move the output grid to 0:1:19Hz.
+-10:1:9 Hz, shift=10 will move the output grid to 0:1:19Hz.  The unit is samples,
+not hertz.  The first argument is along x, or the columns of the matrix, not dim 0.
 
 Q controls the oversampling factor.  It is equivalent to zero padding the input
 array by the same factor.  E.g. mdft of a 256x256 array with Q=2 is the same
 as zero padding it to 512x512 and FFTing that.
 
 See also: [`imdft`](@ref)
+
+# References
+"Fast computation of Lyot-style coronagraph propagation" Soummer et al, oe-15-24-15935
 """
 function mdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
     return mdft(ary, (samples,samples), shift=shift, Q=Q)
@@ -24,10 +28,10 @@ function mdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0
     ξ = fftrange(samples[2])';
     η = fftrange(samples[1]);
     if shift[1] != 0
-        ξ += shift[1]
+        ξ = ξ .+ shift[1]
     end
     if shift[2] != 0
-        η += shift[2]
+        η = η .+ shift[2]
     end
     return _mdft(ary, ξ, η, Q)
 end
@@ -53,13 +57,17 @@ samples is the number of samples in the output domain.  If it is an integer, it
 is broadcast to both dimensions.  Otherwise it may be a tuple to provide each.
 
 shift is used to move the origin.  If the output grid with shift=0 spanned
--10:1:9 Hz, shift=10 will move the output grid to 0:1:19Hz.
+-10:1:9 Hz, shift=10 will move the output grid to 0:1:19Hz.  The unit is samples,
+not hertz.  The first argument is along x, or the columns of the matrix, not dim 0.
 
 Q controls the oversampling factor.  It is equivalent to zero padding the input
 array by the same factor.  E.g. mdft of a 256x256 array with Q=2 is the same
 as zero padding it to 512x512 and FFTing that.
 
 See also: [`mdft`](@ref)
+
+# References
+"Fast computation of Lyot-style coronagraph propagation" Soummer et al, oe-15-24-15935
 """
 function imdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
     return imdft(ary, (samples,samples), shift=shift, Q=Q)
@@ -69,10 +77,10 @@ function imdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,
     ξ = fftrange(samples[2])';
     η = fftrange(samples[1]);
     if shift[1] != 0
-        ξ += shift[1]
+        ξ = ξ .+ shift[1]
     end
     if shift[2] != 0
-        η += shift[2]
+        η = η .+ shift[2]
     end
     return _imdft(ary, ξ, η, Q)
 end
