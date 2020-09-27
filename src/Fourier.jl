@@ -1,6 +1,6 @@
 module Fourier
 
-export mdft, imdft
+export mdft, imdft, fftrange
 
 
 include("mdft.jl")
