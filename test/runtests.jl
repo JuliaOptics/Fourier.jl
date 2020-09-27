@@ -90,6 +90,8 @@ end
 @testset "shift works as expected" begin
     data = ones(100,100);  # uniform plane has all energy in zero DFT bin
     # => bump at (50,50) before shift
+
+    # X shifts
     shifted_fwd = abs.(mdft(data, size(data), shift=(50,0)));
     @test argmax(shifted_fwd)[2] == 1;
     shifted_fwd = abs.(mdft(data, size(data), shift=(-49,0)));
@@ -99,4 +101,15 @@ end
     @test argmax(shifted_fwd)[2] == 1;
     shifted_fwd = abs.(imdft(data, size(data), shift=(-49,0)));
     @test argmax(shifted_fwd)[2] == 100;
+
+    # Y shifts
+    shifted_fwd = abs.(mdft(data, size(data), shift=(0,50)));
+    @test argmax(shifted_fwd)[1] == 1;
+    shifted_fwd = abs.(mdft(data, size(data), shift=(0,-49)));
+    @test argmax(shifted_fwd)[1] == 100;
+
+    shifted_fwd = abs.(imdft(data, size(data), shift=(,50)));
+    @test argmax(shifted_fwd)[1] == 1;
+    shifted_fwd = abs.(imdft(data, size(data), shift=(0,-49)));
+    @test argmax(shifted_fwd)[1] == 100;
 end
