@@ -20,13 +20,13 @@ See also: [`imdft`](@ref)
 # References
 "Fast computation of Lyot-style coronagraph propagation" Soummer et al, oe-15-24-15935
 """
-function mdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
-    return mdft(ary, (samples,samples), shift=shift, Q=Q)
+function mdft(ary, samples::Integer; shift::Tuple{Real,Real} = (0, 0), Q = 1)
+    return mdft(ary, (samples, samples), shift = shift, Q = Q)
 end
 
-function mdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0), Q=1)
-    ξ = fftrange(samples[2])';
-    η = fftrange(samples[1]);
+function mdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real} = (0, 0), Q = 1)
+    ξ = fftrange(samples[2])'
+    η = fftrange(samples[1])
     if shift[1] != 0
         ξ = ξ .+ shift[1]
     end
@@ -37,14 +37,14 @@ function mdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0
 end
 
 function _mdft(ary, ξ, η, Q)
-    n, m = size(ary);
+    n, m = size(ary)
     # X,Y,ξ,η look like -128 : 127, say
-    X = fftrange(m);
-    Y = fftrange(n)';
-    kernel = -1im * 2 * π / Q;
-    pre = exp.(kernel / n .* (η * Y));
-    post = exp.(kernel / m .* (X * ξ));
-    return pre * ary * post;
+    X = fftrange(m)
+    Y = fftrange(n)'
+    kernel = -1im * 2 * π / Q
+    pre = exp.(kernel / n .* (η * Y))
+    post = exp.(kernel / m .* (X * ξ))
+    return pre * ary * post
 end
 
 """
@@ -69,13 +69,18 @@ See also: [`mdft`](@ref)
 # References
 "Fast computation of Lyot-style coronagraph propagation" Soummer et al, oe-15-24-15935
 """
-function imdft(ary, samples::Integer; shift::Tuple{Real,Real}=(0,0), Q=1)
-    return imdft(ary, (samples,samples), shift=shift, Q=Q)
+function imdft(ary, samples::Integer; shift::Tuple{Real,Real} = (0, 0), Q = 1)
+    return imdft(ary, (samples, samples), shift = shift, Q = Q)
 end
 
-function imdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,0), Q=1)
-    ξ = fftrange(samples[2])';
-    η = fftrange(samples[1]);
+function imdft(
+    ary,
+    samples::Tuple{Integer,Integer};
+    shift::Tuple{Real,Real} = (0, 0),
+    Q = 1,
+)
+    ξ = fftrange(samples[2])'
+    η = fftrange(samples[1])
     if shift[1] != 0
         ξ = ξ .+ shift[1]
     end
@@ -86,14 +91,14 @@ function imdft(ary, samples::Tuple{Integer,Integer}; shift::Tuple{Real,Real}=(0,
 end
 
 function _imdft(ary, ξ, η, Q)
-    n, m = size(ary);
+    n, m = size(ary)
     # X,Y,ξ,η look like -128 : 127, say
-    X = fftrange(m);
-    Y = fftrange(n)';
-    kernel = 1im * 2 * π / Q;
-    pre = exp.(kernel / n .* (η * Y));
-    post = exp.(kernel / m .* (X * ξ));
-    return pre * ary * post;
+    X = fftrange(m)
+    Y = fftrange(n)'
+    kernel = 1im * 2 * π / Q
+    pre = exp.(kernel / n .* (η * Y))
+    post = exp.(kernel / m .* (X * ξ))
+    return pre * ary * post
 end
 
 """
@@ -110,7 +115,7 @@ fftshift.  It can be fftshifted to be placed in post-FFT coordinates.
 """
 function fftrange(n)
     if iseven(n)
-        return -(n÷2):(n÷2-1);
+        return -(n ÷ 2):(n÷2-1)
     end
-    return -(n÷2):(n÷2);
+    return -(n ÷ 2):(n÷2)
 end
