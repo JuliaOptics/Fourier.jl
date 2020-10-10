@@ -15,7 +15,7 @@ jobs:
       after_success: skip
     - stage: "Tests"
       script:
-        - julia --project -e 'using Pkg; Pkg.test()'
+        - julia --project --code-coverage=user -e 'using Pkg; Pkg.test()'
 
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
