@@ -13,6 +13,9 @@ jobs:
                                                 Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
       after_success: skip
+    - stage: "Tests"
+      script:
+        - julia --project -e 'using Pkg; Pkg.test()'
 
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
